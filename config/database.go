@@ -17,7 +17,7 @@ func InitDB() *sql.DB {
 	DB_HOST := viper.GetString("DATABASE.DB_HOST")
 	DB_PORT := viper.GetString("DATABASE.DB_PORT")
 
-	dsn := DB_USER + ":" + DB_PASS + "@tcp(" + DB_HOST + ":" + DB_PORT + ")/" + DB_NAME + "?parseTime=true&loc=Asia%2FJakarta"
+	dsn := DB_USER + ":" + DB_PASS + "@tcp(" + DB_HOST + ":" + DB_PORT + ")/" + DB_NAME + "?parseTime=true&loc=Local"
 
 	db, err := sql.Open(DB_DRIVER, dsn)
 	if err != nil {

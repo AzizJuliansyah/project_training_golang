@@ -1,0 +1,10 @@
+{
+  "DATABASE": {
+    "DB_DRIVER": "mysql",
+    "DB_USER": "root",
+    "DB_PASS": "",
+    "DB_NAME": "training_golang_financial_record",
+    "DB_HOST": "127.0.0.1",
+    "DB_PORT": "3306"
+  }
+}

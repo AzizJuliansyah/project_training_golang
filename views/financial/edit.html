@@ -98,7 +98,7 @@
                 
                                 <div class="mb-3">
                                     <label for="description" class="form-label">Keterangan <span class="text-muted">(optional)</span></label>
-                                    <textarea class="form-control {{ if .validation.Description }} is-invalid {{ end }}" name="description" id="description " rows="5">{{ .financial.Description }}</textarea>
+                                    <textarea class="form-control {{ if .validation.Description }} is-invalid {{ end }}" name="description" id="description " rows="5">{{ if .financial.Description }}{{ .financial.Description }}{{ else }}{{ end }}</textarea>
                                     <div class="invalid-feedback">
                                         {{ .validation.Description }}
                                     </div>

@@ -30,7 +30,10 @@ func InitDB() *sql.DB {
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		name TEXT,
 		email TEXT UNIQUE,
-		password TEXT
+		photo TEXT,
+		password TEXT,
+		updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+		created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 	);`
 
 	_, err = db.Exec(createUserTable)

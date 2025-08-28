@@ -3,6 +3,8 @@ package models
 import (
 	"database/sql"
 	"financial_record/entities"
+	"fmt"
+	"log"
 	"time"
 )
 
@@ -17,13 +19,21 @@ func NewFinancialModel(db *sql.DB) *FinancialModel {
 }
 
 func (model FinancialModel) FindAllFinancial(user_id int, monthYear string, pemasukanOnly bool, pengeluaranOnly bool) ([]entities.Financial, error) {
-    parsedDate, _ := time.Parse("January 2006", monthYear)
+    parsedDate, err := time.Parse("January 2006", monthYear)
+    if err != nil {
+        log.Println("Error parsing date:", err)
+        return []entities.Financial{}, err
+    }
+
+    monthStr := fmt.Sprintf("%02d", parsedDate.Month())
+    yearStr := fmt.Sprintf("%d", parsedDate.Year())
+
     query := `
         SELECT id, date, type, category, nominal, description, attachment 
         FROM financial_record 
         WHERE user_id = ?
-        AND MONTH(date) = ?
-        AND YEAR(date) = ?
+        AND strftime('%m', date) = ?
+        AND strftime('%Y', date) = ?
     `
 
     if pemasukanOnly {
@@ -33,7 +43,7 @@ func (model FinancialModel) FindAllFinancial(user_id int, monthYear string, pema
         query += " AND type = 'pengeluaran'"
     }
 
-    rows, err := model.db.Query(query, user_id, parsedDate.Month(), parsedDate.Year())
+    rows, err := model.db.Query(query, user_id, monthStr, yearStr)
     if err != nil {
         return []entities.Financial{}, err
     }
@@ -60,16 +70,25 @@ func (model FinancialModel) FindAllFinancial(user_id int, monthYear string, pema
     return financials, rows.Err()
 }
 
+
 func (model FinancialModel) GetFinancialTotalNominal(user_id int, monthYear string, pemasukanOnly bool, pengeluaranOnly bool) (total_pemasukan int64, total_pengeluaran int64, err error) {
-	parsedDate, _ := time.Parse("January 2006", monthYear)	
+	parsedDate, err := time.Parse("January 2006", monthYear)
+    if err != nil {
+        log.Println("Error parsing date:", err)
+        return 0, 0, err
+    }
+
+    monthStr := fmt.Sprintf("%02d", parsedDate.Month())
+    yearStr := fmt.Sprintf("%d", parsedDate.Year())
+
 	query := `
 		SELECT
 			COALESCE(SUM(CASE WHEN type = 'pemasukan' THEN nominal ELSE 0 END), 0) AS total_pemasukan,
 			COALESCE(SUM(CASE WHEN type = 'pengeluaran' THEN nominal ELSE 0 END), 0) AS total_pengeluaran
 		FROM financial_record
 		WHERE user_id = ?
-		AND MONTH(date) = ?
-        AND YEAR(date) = ?
+		AND strftime('%m', date) = ?
+		AND strftime('%Y', date) = ?
 	`
 
 	if pemasukanOnly {
@@ -79,7 +98,7 @@ func (model FinancialModel) GetFinancialTotalNominal(user_id int, monthYear stri
 		query += " AND type = 'pengeluaran'"
 	}
 
-	err = model.db.QueryRow(query, user_id, parsedDate.Month(), parsedDate.Year()).Scan(&total_pemasukan, &total_pengeluaran)
+	err = model.db.QueryRow(query, user_id, monthStr, yearStr).Scan(&total_pemasukan, &total_pengeluaran)
 	if err != nil {
 		return 0, 0, err
 	}

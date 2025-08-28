@@ -2,22 +2,19 @@ package config
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
-	"time"
 
-	_ "github.com/go-sql-driver/mysql"
 	"github.com/spf13/viper"
+	_ "modernc.org/sqlite"
 )
 
 func InitDB() *sql.DB {
 	DB_DRIVER := viper.GetString("DATABASE.DB_DRIVER")
-	DB_USER := viper.GetString("DATABASE.DB_USER")
-	DB_PASS := viper.GetString("DATABASE.DB_PASS")
 	DB_NAME := viper.GetString("DATABASE.DB_NAME")
-	DB_HOST := viper.GetString("DATABASE.DB_HOST")
-	DB_PORT := viper.GetString("DATABASE.DB_PORT")
 
-	dsn := DB_USER + ":" + DB_PASS + "@tcp(" + DB_HOST + ":" + DB_PORT + ")/" + DB_NAME + "?parseTime=true&loc=Asia%2FJakarta"
+	// DSN untuk SQLite hanya membutuhkan path file database
+	dsn := DB_NAME
 
 	db, err := sql.Open(DB_DRIVER, dsn)
 	if err != nil {
@@ -28,9 +25,41 @@ func InitDB() *sql.DB {
 		log.Fatal("Failed to connect to database (ping error)", err)
 	}
 
-	db.SetMaxOpenConns(10)
-	db.SetMaxIdleConns(5)
-	db.SetConnMaxLifetime(5 * time.Minute)
+	createUserTable := `
+	CREATE TABLE IF NOT EXISTS users (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		name TEXT,
+		email TEXT UNIQUE,
+		password TEXT
+	);`
+
+	_, err = db.Exec(createUserTable)
+	if err != nil {
+		log.Fatal("Error creating user table:", err)
+	} else {
+		fmt.Println("Successfully creating user table")
+	}
+
+	createFinancialTable := `
+	CREATE TABLE IF NOT EXISTS financial_record (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		user_id INTEGER NOT NULL,
+		date DATE NOT NULL,
+		type TEXT NOT NULL,
+		category TEXT NOT NULL,
+		nominal INTEGER NOT NULL,
+		description TEXT,
+		attachment TEXT,
+		updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+		created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+	);`
+
+	_, err = db.Exec(createFinancialTable)
+	if err != nil {
+		log.Fatal("Error creating financial table:", err)
+	} else {
+		fmt.Println("Successfully creating financial table")
+	}
 
 	log.Println("Database connection successfully")
 	return db

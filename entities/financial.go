@@ -19,7 +19,7 @@ type Financial struct {
 type AddFinancial struct {
 	Id			int64
 	UserId		int
-	Date		time.Time	`validate:"required" label:"Tanggal"`
+	Date		string	`validate:"required" label:"Tanggal"`
 	Type		string		`validate:"required" label:"Tipe"`
 	Nominal		int64		`validate:"required,numeric,min=0"`
 	Category	string		`validate:"required" label:"Kategori"`

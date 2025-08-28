@@ -110,6 +110,7 @@ func (controller *FinancialController) AddFinancialRecord(httpWriter http.Respon
 
 		dateStr := request.Form.Get("date")
 		date, _ := time.Parse("2006-01-02", dateStr)
+		formattedDate := date.Format("2006-01-02 15:04:05") // format date ke string
 
 		nominalStr := request.Form.Get("nominal")
 		NominalInt64, _ := strconv.ParseInt(nominalStr, 10, 64)
@@ -127,7 +128,7 @@ func (controller *FinancialController) AddFinancialRecord(httpWriter http.Respon
 		sessionUserId := session.Values["id"].(int)
 		financial := entities.AddFinancial{
 			UserId:		 sessionUserId,
-			Date:        date,
+			Date:        formattedDate, // masukan date string ke db
 			Type:        request.Form.Get("type"),
 			Nominal: 	 NominalInt64,
 			Category:    request.Form.Get("category"),
@@ -198,6 +199,7 @@ func (controller *FinancialController) EditFinancialRecord(httpWriter http.Respo
 
 		dateStr := request.Form.Get("date")
 		date, _ := time.Parse("2006-01-02", dateStr)
+		formattedDate := date.Format("2006-01-02 15:04:05") // format date ke string
 
 		nominalStr := request.Form.Get("nominal")
 		NominalInt64, _ := strconv.ParseInt(nominalStr, 10, 64)
@@ -214,7 +216,7 @@ func (controller *FinancialController) EditFinancialRecord(httpWriter http.Respo
 
 		financial := entities.AddFinancial{
 			Id: 		 Int64,
-			Date:        date,
+			Date:        formattedDate, // masukan date string ke db
 			Type:        request.Form.Get("type"),
 			Nominal: 	 NominalInt64,
 			Category:    request.Form.Get("category"),
